@@ -26,6 +26,7 @@ from dsmr_weather.models.reading import TemperatureReading
 from dsmr_stats.models.note import Note
 from dsmr_datalogger.models.statistics import MeterStatistics
 import dsmr_backend.services.backend
+import dsmr_consumption.signals
 
 
 logger = logging.getLogger("dsmrreader")
@@ -276,7 +277,7 @@ def _compact_electricity(
         avg_phase_power_current_l3=Avg("phase_power_current_l3"),
     )
 
-    ElectricityConsumption.objects.create(
+    Instance = ElectricityConsumption.objects.create(
         read_at=minute_end,
         delivered_1=grouped_reading["max_delivered_1"],
         returned_1=grouped_reading["max_returned_1"],
@@ -298,6 +299,9 @@ def _compact_electricity(
         phase_power_current_l3=grouped_reading["avg_phase_power_current_l3"],
     )
 
+    dsmr_consumption.signals.consumption_created.send_robust(
+        None, instance=Instance
+    )
 
 def _compact_gas(dsmr_reading: DsmrReading, gas_grouping_type: int) -> None:
     """

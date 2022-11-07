@@ -10,8 +10,8 @@ from dsmr_backend.signals import (
     terminate_persistent_client,
 )
 from dsmr_backend.tests.mixins import InterceptCommandStdoutMixin
-from dsmr_datalogger.models.reading import DsmrReading
-from dsmr_datalogger.signals import dsmr_reading_created
+from dsmr_consumption.models.consumption import ElectricityConsumption
+from dsmr_consumption.signals import consumption_created
 from dsmr_influxdb.models import InfluxdbIntegrationSettings
 
 
@@ -63,24 +63,35 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
         influxdb_settings.save()
         self.assertTrue(send_robust_mock.called)
 
-    @mock.patch("dsmr_influxdb.services.publish_dsmr_reading")
+    @mock.patch("dsmr_influxdb.services.publish_consumption")
     def test_publish_dsmr_reading_handler(self, publish_dsmr_reading_mock):
-        dsmr_reading = DsmrReading.objects.create(
-            timestamp=timezone.now(),
-            electricity_delivered_1=1,
-            electricity_returned_1=2,
-            electricity_delivered_2=3,
-            electricity_returned_2=4,
-            electricity_currently_delivered=5,
-            electricity_currently_returned=6,
-            processed=False,
+        dsmr_reading = ElectricityConsumption.objects.create(
+            read_at=timezone.now(),
+            delivered_1=1,
+            returned_1=2,
+            delivered_2=3,
+            returned_2=4,
+            currently_delivered=5,
+            currently_returned=6,
+            phase_currently_delivered_l1=7,
+            phase_currently_delivered_l2=8,
+            phase_currently_delivered_l3=9,
+            phase_currently_returned_l1=10,
+            phase_currently_returned_l2=11,
+            phase_currently_returned_l3=12,
+            phase_voltage_l1=13,
+            phase_voltage_l2=14,
+            phase_voltage_l3=15,
+            phase_power_current_l1=16,
+            phase_power_current_l2=17,
+            phase_power_current_l3=18,
         )
 
         self.assertFalse(publish_dsmr_reading_mock.called)
-        dsmr_reading_created.send_robust(None, instance=dsmr_reading)
+        consumption_created.send_robust(None, instance=dsmr_reading)
         self.assertTrue(publish_dsmr_reading_mock.called)
 
         # Trigger error.
         publish_dsmr_reading_mock.side_effect = RuntimeError()
-        dsmr_reading_created.send_robust(None, instance=dsmr_reading)
+        consumption_created.send_robust(None, instance=dsmr_reading)
         # Should not crash the test.

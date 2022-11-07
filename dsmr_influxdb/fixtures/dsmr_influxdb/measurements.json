@@ -3,8 +3,8 @@
     "pk": 1,
     "fields": {
         "time": "2020-07-16T21:38:39Z",
-        "measurement_name": "electricity_phases",
-        "fields": "gASVAAEAAAAAAAB9lCiMFmN1cnJlbnRseV9kZWxpdmVyZWRfbDGUjAdkZWNpbWFslIwHRGVjaW1hbJSTlIwFMC41NTWUhZRSlIwWY3VycmVudGx5X2RlbGl2ZXJlZF9sMpRoBIwFMC41MTOUhZRSlIwWY3VycmVudGx5X2RlbGl2ZXJlZF9sM5RoBIwFMC43NjWUhZRSlIwVY3VycmVudGx5X3JldHVybmVkX2wxlGgEjAUwLjAwMJSFlFKUjBVjdXJyZW50bHlfcmV0dXJuZWRfbDKUaASMBTAuMDAwlIWUUpSMFWN1cnJlbnRseV9yZXR1cm5lZF9sM5RoBIwFMC4wMDCUhZRSlHUu"
+        "measurement_name": "electricity_positions",
+        "fields": "gASVlgAAAAAAAAB9lCiMC2RlbGl2ZXJlZF8xlIwHZGVjaW1hbJSMB0RlY2ltYWyUk5SMCTI0Nzc2\nLjgzOZSFlFKUjApyZXR1cm5lZF8xlGgEjAg0OTU1LjM2OJSFlFKUjAtkZWxpdmVyZWRfMpRoBIwJ\nMTQ4NjYuMTA0lIWUUpSMCnJldHVybmVkXzKUaASMCTE5ODIxLjQ3MpSFlFKUdS4=\n"
     }
 },
 {
@@ -12,8 +12,8 @@
     "pk": 2,
     "fields": {
         "time": "2020-07-16T21:38:39Z",
-        "measurement_name": "electricity_power",
-        "fields": "gASVXgAAAAAAAAB9lCiMCmN1cnJlbnRfbDGUjAdkZWNpbWFslIwHRGVjaW1hbJSTlIwBN5SFlFKUjApjdXJyZW50X2wylGgEjAEzlIWUUpSMCmN1cnJlbnRfbDOUaASMATGUhZRSlHUu"
+        "measurement_name": "electricity_voltage",
+        "fields": "gASVkQAAAAAAAAB9lCiMCHBoYXNlX2wxlIwHZGVjaW1hbJSMB0RlY2ltYWyUk5SMFDIyNC4xMzMz\nMzMzMzMzMzMzMzMzlIWUUpSMCHBoYXNlX2wylGgEjBQyMjYuNDY2NjY2NjY2NjY2NjY2N5SFlFKU\njAhwaGFzZV9sM5RoBIwUMjMwLjQ2NjY2NjY2NjY2NjY2NjeUhZRSlHUu\n"
     }
 },
 {
@@ -21,7 +21,16 @@
     "pk": 3,
     "fields": {
         "time": "2020-07-16T21:38:39Z",
-        "measurement_name": "electricity_positions",
-        "fields": "gASVgwAAAAAAAAB9lCiMC2RlbGl2ZXJlZF8xlIwHZGVjaW1hbJSMB0RlY2ltYWyUk5SMCTIxMjI2LjQwNJSFlFKUjApyZXR1cm5lZF8xlGgEjAUwLjAwMJSFlFKUjAtkZWxpdmVyZWRfMpRoBIwJMTI3MzUuODQylIWUUpSMCnJldHVybmVkXzKUSwB1Lg=="
+        "measurement_name": "electricity_phases",
+        "fields": "gASVMwEAAAAAAAB9lCiMFmN1cnJlbnRseV9kZWxpdmVyZWRfbDGUjAdkZWNpbWFslIwHRGVjaW1h\nbJSTlIwWMC42NDc2NjY2NjY2NjY2NjY2NjY2N5SFlFKUjBZjdXJyZW50bHlfZGVsaXZlcmVkX2wy\nlGgEjBYwLjcxNjMzMzMzMzMzMzMzMzMzMzMzlIWUUpSMFmN1cnJlbnRseV9kZWxpdmVyZWRfbDOU\naASMFjEuMjQzNjY2NjY2NjY2NjY2NjY2NjeUhZRSlIwVY3VycmVudGx5X3JldHVybmVkX2wxlGgE\njAUwRS0yMJSFlFKUjBVjdXJyZW50bHlfcmV0dXJuZWRfbDKUaASMBTBFLTIwlIWUUpSMFWN1cnJl\nbnRseV9yZXR1cm5lZF9sM5RoBIwFMEUtMjCUhZRSlHUu\n"
+    }
+},
+{
+    "model": "dsmr_influxdb.influxdbmeasurement",
+    "pk": 3,
+    "fields": {
+        "time": "2020-07-16T21:38:39Z",
+        "measurement_name": "electricity_power",
+        "fields": "gASVRwAAAAAAAAB9lCiMCmN1cnJlbnRfbDGUR0AaqqqqqqqrjApjdXJyZW50X2wylEdABVVVVVVV\nVYwKY3VycmVudF9sM5RHAAAAAAAAAAB1Lg==\n"
     }
 }]

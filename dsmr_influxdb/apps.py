@@ -14,7 +14,7 @@ from dsmr_backend.signals import (
     terminate_persistent_client,
     request_status,
 )
-from dsmr_datalogger.signals import dsmr_reading_created
+from dsmr_consumption.signals import consumption_created
 
 
 logger = logging.getLogger("dsmrreader")
@@ -25,12 +25,12 @@ class DsmrInfluxdbConfig(AppConfig):
     verbose_name = _("InfluxDB")
 
 
-@receiver(dsmr_reading_created)
-def _on_dsmrreading_created_signal(instance, **kwargs):
+@receiver(consumption_created)
+def _on_consumption_created_signal(instance, **kwargs):
     import dsmr_influxdb.services
 
     try:
-        dsmr_influxdb.services.publish_dsmr_reading(instance=instance)
+        dsmr_influxdb.services.publish_consumption(instance=instance)
     except Exception as error:
         logger.error("publish_dsmr_reading() failed: %s", error)
 

@@ -9,8 +9,8 @@ from django.conf import settings
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-from dsmr_datalogger.models.reading import DsmrReading
 from dsmr_influxdb.models import InfluxdbIntegrationSettings, InfluxdbMeasurement
+from dsmr_consumption.models.consumption import ElectricityConsumption
 
 
 logger = logging.getLogger("dsmrreader")
@@ -113,7 +113,8 @@ def run(influxdb_client: InfluxDBClient) -> None:
     InfluxdbMeasurement.objects.all().delete()
 
 
-def publish_dsmr_reading(instance: DsmrReading) -> None:
+def publish_consumption(instance: ElectricityConsumption) -> None:
+
     influxdb_settings = InfluxdbIntegrationSettings.get_solo()
 
     # Integration disabled.
@@ -134,7 +135,7 @@ def publish_dsmr_reading(instance: DsmrReading) -> None:
 
         InfluxdbMeasurement.objects.create(
             measurement_name=current_measurement,
-            time=data_source["timestamp"],
+            time=data_source["read_at"],
             fields=encoded_fields,
         )
 
@@ -143,7 +144,7 @@ def get_reading_to_measurement_mapping() -> Dict:
     """Parses and returns the formatting mapping as defined by the user."""
     READING_FIELDS = [
         x.name
-        for x in DsmrReading._meta.get_fields()
+        for x in ElectricityConsumption._meta.get_fields()
         if x.name not in ("id", "processed")
     ]
     mapping = defaultdict(dict)

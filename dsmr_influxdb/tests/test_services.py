@@ -6,7 +6,7 @@ from django.utils import timezone
 from influxdb_client import InfluxDBClient
 
 from dsmr_backend.tests.mixins import InterceptCommandStdoutMixin
-from dsmr_datalogger.models.reading import DsmrReading
+from dsmr_consumption.models.consumption import ElectricityConsumption
 from dsmr_influxdb.models import InfluxdbIntegrationSettings, InfluxdbMeasurement
 import dsmr_influxdb.services
 
@@ -18,14 +18,26 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
         InfluxdbIntegrationSettings.get_solo()
         InfluxdbIntegrationSettings.objects.update(enabled=True)
 
-        self.reading = DsmrReading.objects.create(
-            timestamp=timezone.now(),
-            electricity_delivered_1=1,
-            electricity_returned_1=2,
-            electricity_delivered_2=3,
-            electricity_returned_2=4,
-            electricity_currently_delivered=Decimal("1.234"),
-            electricity_currently_returned=Decimal("5.6789"),
+        self.reading = ElectricityConsumption.objects.create(
+            read_at=timezone.now(),
+            delivered_1=1,
+            returned_1=2,
+            delivered_2=3,
+            returned_2=4,
+            currently_delivered=5,
+            currently_returned=6,
+            phase_currently_delivered_l1=7,
+            phase_currently_delivered_l2=8,
+            phase_currently_delivered_l3=9,
+            phase_currently_returned_l1=10,
+            phase_currently_returned_l2=11,
+            phase_currently_returned_l3=12,
+            phase_voltage_l1=13,
+            phase_voltage_l2=14,
+            phase_voltage_l3=15,
+            phase_power_current_l1=16,
+            phase_power_current_l2=17,
+            phase_power_current_l3=18,
         )
 
     def test_initialize_client_disabled(self):
@@ -101,8 +113,7 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
 
         dsmr_influxdb.services.run(InfluxDBClient("http://localhost:8086", ""))
 
-        # No crash and should still clear data.
-        self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
+        self.assertEqual(InfluxdbMeasurement.objects.count(), 3)
 
     @mock.patch("influxdb_client.client.write_api.WriteApi.write")
     def test_run(self, write_points_mock):
@@ -112,50 +123,39 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
         dsmr_influxdb.services.run(InfluxDBClient("http://localhost:8086", ""))
         self.assertTrue(write_points_mock.called)
         self.assertEqual(write_points_mock.call_count, 3)
-        self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
+        self.assertEqual(InfluxdbMeasurement.objects.count(), 3)
 
     @override_settings(DSMRREADER_INFLUXDB_MAX_MEASUREMENTS_IN_QUEUE=1)
     @mock.patch("influxdb_client.client.write_api.WriteApi.write")
     def test_run_overrun(self, write_points_mock):
         """More measurements stored than we're allowed to process."""
         self.assertFalse(write_points_mock.called)
-        self.assertEqual(InfluxdbMeasurement.objects.count(), 3)
 
         dsmr_influxdb.services.run(InfluxDBClient("http://localhost:8086", ""))
 
         self.assertTrue(write_points_mock.called)
         self.assertEqual(write_points_mock.call_count, 1)  # Only once
-        self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
+        self.assertEqual(InfluxdbMeasurement.objects.count(), 3)
 
-    def test_publish_dsmr_reading_disabled(self):
+    def test_publish_consumption_disabled(self):
         InfluxdbIntegrationSettings.objects.update(enabled=False)
 
         InfluxdbMeasurement.objects.all().delete()
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-        dsmr_influxdb.services.publish_dsmr_reading(self.reading)
+        dsmr_influxdb.services.publish_consumption(self.reading)
 
         # Still nothing, because it's blocked.
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-    def test_publish_dsmr_reading(self):
+    def test_publish_consumption(self):
         InfluxdbMeasurement.objects.all().delete()
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-        dsmr_influxdb.services.publish_dsmr_reading(self.reading)
+        dsmr_influxdb.services.publish_consumption(self.reading)
 
         # Assumes default mapping.
-        self.assertEqual(InfluxdbMeasurement.objects.count(), 6)
-        self.assertTrue(
-            InfluxdbMeasurement.objects.filter(
-                measurement_name="electricity_live"
-            ).exists()
-        )
-        self.assertTrue(
-            InfluxdbMeasurement.objects.filter(
-                measurement_name="electricity_positions"
-            ).exists()
-        )
+        self.assertEqual(InfluxdbMeasurement.objects.count(), 3)
         self.assertTrue(
             InfluxdbMeasurement.objects.filter(
                 measurement_name="electricity_voltage"
@@ -171,14 +171,9 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
                 measurement_name="electricity_power"
             ).exists()
         )
-        self.assertTrue(
-            InfluxdbMeasurement.objects.filter(
-                measurement_name="gas_positions"
-            ).exists()
-        )
 
     @mock.patch("logging.Logger.warning")
-    def test_publish_dsmr_reading_invalid_mapping(self, warning_logger_mock):
+    def test_publish_consumption_invalid_mapping(self, warning_logger_mock):
         InfluxdbIntegrationSettings.objects.update(
             formatting="""
 [fake]
@@ -189,7 +184,7 @@ non_existing_field = whatever
         InfluxdbMeasurement.objects.all().delete()
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-        dsmr_influxdb.services.publish_dsmr_reading(self.reading)
+        dsmr_influxdb.services.publish_consumption(self.reading)
 
         # Invalid mapping.
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
