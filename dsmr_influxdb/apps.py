@@ -32,7 +32,7 @@ def _on_consumption_created_signal(instance, **kwargs):
     try:
         dsmr_influxdb.services.publish_consumption(instance=instance)
     except Exception as error:
-        logger.error("publish_dsmr_reading() failed: %s", error)
+        logger.error("publish_consumption() failed: %s", error)
 
 
 @receiver(initialize_persistent_client)
