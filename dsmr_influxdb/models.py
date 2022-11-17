@@ -119,7 +119,7 @@ phase_power_current_l3 = current_l3
 ### DSMR-reader field 2 = InfluxDB field 2
 
 [gas_positions]
-extra_device_delivered = gas_delivered
+delivered = gas_delivered
 
 """,
         verbose_name=_("Formatting_g"),
