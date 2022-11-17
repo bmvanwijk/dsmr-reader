@@ -11,7 +11,7 @@ from dsmr_backend.signals import (
 )
 from dsmr_backend.tests.mixins import InterceptCommandStdoutMixin
 from dsmr_consumption.models.consumption import ElectricityConsumption
-from dsmr_consumption.signals import consumption_created
+from dsmr_consumption.signals import e_consumption_created
 from dsmr_influxdb.models import InfluxdbIntegrationSettings
 
 
@@ -88,10 +88,10 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
         )
 
         self.assertFalse(publish_dsmr_reading_mock.called)
-        consumption_created.send_robust(None, instance=dsmr_reading)
+        e_consumption_created.send_robust(None, instance=dsmr_reading)
         self.assertTrue(publish_dsmr_reading_mock.called)
 
         # Trigger error.
         publish_dsmr_reading_mock.side_effect = RuntimeError()
-        consumption_created.send_robust(None, instance=dsmr_reading)
+        e_consumption_created.send_robust(None, instance=dsmr_reading)
         # Should not crash the test.

@@ -79,7 +79,7 @@ class Command(BaseCommand):
             )
 
         logger.info("INFLUXDB EXPORT: Fetching mapping")
-        self.field_mapping = dsmr_influxdb.services.get_reading_to_measurement_mapping()
+        self.field_mapping = dsmr_influxdb.services.get_e_consumption_mapping()
 
         logger.info("INFLUXDB EXPORT: Listing mapped reading fields")
         reading_fields = self.list_reading_fields()

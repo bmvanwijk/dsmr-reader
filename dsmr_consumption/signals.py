@@ -2,4 +2,5 @@ from django.dispatch import Signal
 
 
 # Consumptions created a new Compact
-consumption_created = Signal()
+e_consumption_created = Signal()
+g_consumption_created = Signal()

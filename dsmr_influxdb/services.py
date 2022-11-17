@@ -10,7 +10,7 @@ from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from dsmr_influxdb.models import InfluxdbIntegrationSettings, InfluxdbMeasurement
-from dsmr_consumption.models.consumption import ElectricityConsumption
+from dsmr_consumption.models.consumption import ElectricityConsumption, GasConsumption
 
 
 logger = logging.getLogger("dsmrreader")
@@ -99,7 +99,9 @@ def run(influxdb_client: InfluxDBClient) -> None:
                         "time": current.time,
                         "fields": unpickled_fields,
                     },
+
                 )
+
         except Exception as error:
             logger.error(
                 "INFLUXDB: Writing measurement(s) failed: %s, data: %s",
@@ -113,7 +115,7 @@ def run(influxdb_client: InfluxDBClient) -> None:
     InfluxdbMeasurement.objects.all().delete()
 
 
-def publish_consumption(instance: ElectricityConsumption) -> None:
+def publish_e_consumption(instance: ElectricityConsumption) -> None:
 
     influxdb_settings = InfluxdbIntegrationSettings.get_solo()
 
@@ -121,7 +123,7 @@ def publish_consumption(instance: ElectricityConsumption) -> None:
     if not influxdb_settings.enabled:
         return
 
-    mapping = get_reading_to_measurement_mapping()
+    mapping = get_e_consumption_mapping()
     data_source = instance.__dict__
 
     for current_measurement, measurement_mapping in mapping.items():
@@ -140,7 +142,7 @@ def publish_consumption(instance: ElectricityConsumption) -> None:
         )
 
 
-def get_reading_to_measurement_mapping() -> Dict:
+def get_e_consumption_mapping() -> Dict:
     """Parses and returns the formatting mapping as defined by the user."""
     READING_FIELDS = [
         x.name
@@ -150,7 +152,63 @@ def get_reading_to_measurement_mapping() -> Dict:
     mapping = defaultdict(dict)
 
     config_parser = configparser.ConfigParser()
-    config_parser.read_string(InfluxdbIntegrationSettings.get_solo().formatting)
+    config_parser.read_string(InfluxdbIntegrationSettings.get_solo().formatting_e)
+
+    for current_measurement in config_parser.sections():
+        for instance_field_name in config_parser[current_measurement]:
+            influxdb_field_name = config_parser[current_measurement][
+                instance_field_name
+            ]
+
+            if instance_field_name not in READING_FIELDS:
+                logger.warning(
+                    'INFLUXDB: Unknown DSMR-reading field "%s" mapped to measurement "%s"',
+                    instance_field_name,
+                    current_measurement,
+                )
+                continue
+
+            mapping[current_measurement][instance_field_name] = influxdb_field_name
+
+    return mapping
+
+def publish_g_consumption(instance: GasConsumption) -> None:
+
+    influxdb_settings = InfluxdbIntegrationSettings.get_solo()
+
+    # Integration disabled.
+    if not influxdb_settings.enabled:
+        return
+
+    mapping = get_g_consumption_mapping()
+    data_source = instance.__dict__
+
+    for current_measurement, measurement_mapping in mapping.items():
+        measurement_fields = {}
+
+        for reading_field, influxdb_field in measurement_mapping.items():
+            measurement_fields[influxdb_field] = data_source[reading_field]
+
+        pickled_fields = pickle.dumps(measurement_fields)
+        encoded_fields = codecs.encode(pickled_fields, "base64").decode()
+
+        InfluxdbMeasurement.objects.create(
+            measurement_name=current_measurement,
+            time=data_source["read_at"],
+            fields=encoded_fields,
+        )
+
+def get_g_consumption_mapping() -> Dict:
+    """Parses and returns the formatting mapping as defined by the user."""
+    READING_FIELDS = [
+        x.name
+        for x in GasConsumption._meta.get_fields()
+        if x.name not in ("id", "processed")
+    ]
+    mapping = defaultdict(dict)
+
+    config_parser = configparser.ConfigParser()
+    config_parser.read_string(InfluxdbIntegrationSettings.get_solo().formatting_g)
 
     for current_measurement in config_parser.sections():
         for instance_field_name in config_parser[current_measurement]:

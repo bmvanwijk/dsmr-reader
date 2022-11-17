@@ -299,7 +299,7 @@ def _compact_electricity(
         phase_power_current_l3=grouped_reading["avg_phase_power_current_l3"],
     )
 
-    dsmr_consumption.signals.consumption_created.send_robust(
+    dsmr_consumption.signals.e_consumption_created.send_robust(
         None, instance=Instance
     )
 
@@ -346,10 +346,14 @@ def _compact_gas(dsmr_reading: DsmrReading, gas_grouping_type: int) -> None:
     else:
         gas_diff = dsmr_reading.extra_device_delivered - previous.delivered
 
-    GasConsumption.objects.create(
+    Instance = GasConsumption.objects.create(
         read_at=gas_read_at,
         delivered=dsmr_reading.extra_device_delivered,
         currently_delivered=gas_diff,
+    )
+
+    dsmr_consumption.signals.g_consumption_created.send_robust(
+        None, instance=Instance
     )
 
 

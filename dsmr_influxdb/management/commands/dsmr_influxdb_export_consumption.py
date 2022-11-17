@@ -32,6 +32,7 @@ class Command(BaseCommand):
             raise CommandError("InfluxDB integration is disabled")
 
         if not selection:
+            logger.info("INFLUXDB: No InfluxDB measurement objects to export, returning")
             return
 
         logger.info("INFLUXDB: Processing %d measurement(s)", len(selection))

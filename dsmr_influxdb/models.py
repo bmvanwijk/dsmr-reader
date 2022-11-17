@@ -75,7 +75,7 @@ class InfluxdbIntegrationSettings(ModelUpdateMixin, SingletonModel):
             "Select SECURE (CERT_NONE) for self-signed certificates."
         ),
     )
-    formatting = models.TextField(
+    formatting_e = models.TextField(
         default="""
 ### [measurement_name]
 ### DSMR-reader field 1 = InfluxDB field 1
@@ -106,9 +106,25 @@ phase_power_current_l2 = current_l2
 phase_power_current_l3 = current_l3
 
 """,
-        verbose_name=_("Formatting"),
+        verbose_name=_("Formatting_e"),
         help_text=_(
-            "Mapping used for the measurements used in your InfluxDB database."
+            "Mapping used for the electricity measurements used in your InfluxDB database."
+        ),
+    )
+
+    formatting_g = models.TextField(
+        default="""
+### [measurement_name]
+### DSMR-reader field 1 = InfluxDB field 1
+### DSMR-reader field 2 = InfluxDB field 2
+
+[gas_positions]
+extra_device_delivered = gas_delivered
+
+""",
+        verbose_name=_("Formatting_g"),
+        help_text=_(
+            "Mapping used for the gas measurements used in your InfluxDB database."
         ),
     )
 

@@ -143,7 +143,7 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
         InfluxdbMeasurement.objects.all().delete()
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-        dsmr_influxdb.services.publish_consumption(self.reading)
+        dsmr_influxdb.services.publish_e_consumption(self.reading)
 
         # Still nothing, because it's blocked.
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
@@ -152,7 +152,7 @@ class TestCases(InterceptCommandStdoutMixin, TestCase):
         InfluxdbMeasurement.objects.all().delete()
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-        dsmr_influxdb.services.publish_consumption(self.reading)
+        dsmr_influxdb.services.publish_e_consumption(self.reading)
 
         # Assumes default mapping.
         self.assertEqual(InfluxdbMeasurement.objects.count(), 3)
@@ -184,7 +184,7 @@ non_existing_field = whatever
         InfluxdbMeasurement.objects.all().delete()
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)
 
-        dsmr_influxdb.services.publish_consumption(self.reading)
+        dsmr_influxdb.services.publish_e_consumption(self.reading)
 
         # Invalid mapping.
         self.assertEqual(InfluxdbMeasurement.objects.count(), 0)

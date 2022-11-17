@@ -14,7 +14,7 @@ from dsmr_backend.signals import (
     terminate_persistent_client,
     request_status,
 )
-from dsmr_consumption.signals import consumption_created
+from dsmr_consumption.signals import e_consumption_created, g_consumption_created
 
 
 logger = logging.getLogger("dsmrreader")
@@ -25,14 +25,23 @@ class DsmrInfluxdbConfig(AppConfig):
     verbose_name = _("InfluxDB")
 
 
-@receiver(consumption_created)
-def _on_consumption_created_signal(instance, **kwargs):
+@receiver(e_consumption_created)
+def _on_e_consumption_created_signal(instance, **kwargs):
     import dsmr_influxdb.services
 
     try:
-        dsmr_influxdb.services.publish_consumption(instance=instance)
+        dsmr_influxdb.services.publish_e_consumption(instance=instance)
     except Exception as error:
-        logger.error("publish_consumption() failed: %s", error)
+        logger.error("publish_e_consumption() failed: %s", error)
+
+@receiver(g_consumption_created)
+def _on_g_consumption_created_signal(instance, **kwargs):
+    import dsmr_influxdb.services
+
+    try:
+        dsmr_influxdb.services.publish_g_consumption(instance=instance)
+    except Exception as error:
+        logger.error("publish_g_consumption() failed: %s", error)
 
 
 @receiver(initialize_persistent_client)
